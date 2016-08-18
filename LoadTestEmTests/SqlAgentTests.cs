@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LoadTestEm.ValueGetters;
+using LoadTestEm.Agents;
 
 namespace LoadTestEm.Tests
 {

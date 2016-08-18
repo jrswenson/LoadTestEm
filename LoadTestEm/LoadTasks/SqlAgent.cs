@@ -1,14 +1,12 @@
-﻿using LoadTestEm;
-using LoadTestEm.ValueGetters;
+﻿using LoadTestEm.ValueGetters;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace LoadTestEm
+namespace LoadTestEm.Agents
 {
     public class SqlAgent : IAgent, IDisposable
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace LoadTestEm
+namespace LoadTestEm.Agents
 {
     public interface IAgent
     {
