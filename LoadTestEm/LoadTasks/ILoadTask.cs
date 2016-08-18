@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace LoadTestEm.Agents
+namespace LoadTestEm.LoadTasks
 {
-    public interface IAgent
+    public interface ILoadTask
     {
         Task<long> ExecuteAsync();
     }

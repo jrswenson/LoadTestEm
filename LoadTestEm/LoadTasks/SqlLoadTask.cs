@@ -6,9 +6,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LoadTestEm.Agents
+namespace LoadTestEm.LoadTasks
 {
-    public class SqlAgent : IAgent, IDisposable
+    public class SqlLoadTask : ILoadTask, IDisposable
     {
         private SqlConnection connection;
         private bool reuseConnection = true;

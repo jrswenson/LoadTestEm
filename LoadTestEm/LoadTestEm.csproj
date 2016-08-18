@@ -68,9 +68,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Agents\IAgent.cs" />
-    <Compile Include="Agents\SqlAgent.cs" />
-    <Compile Include="LoadSet.cs" />
+    <Compile Include="LoadSets\LoadSet.cs" />
+    <Compile Include="LoadTasks\ILoadTask.cs" />
+    <Compile Include="LoadTasks\SqlLoadTask.cs" />
     <Compile Include="ValueGetters\IValueGetter.cs" />
     <Compile Include="Loader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

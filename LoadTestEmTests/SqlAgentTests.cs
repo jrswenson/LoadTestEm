@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LoadTestEm.ValueGetters;
-using LoadTestEm.Agents;
+using LoadTestEm.LoadTasks;
 
 namespace LoadTestEm.Tests
 {
@@ -16,7 +16,7 @@ namespace LoadTestEm.Tests
         [TestMethod()]
         public void ExecuteAsyncTest()
         {
-            var agent = new SqlAgent
+            var agent = new SqlLoadTask
             {
                 ConnectionString = "Data Source=(local);Initial Catalog=LoadTestEm;Integrated Security=SSPI",
                 Command = "select * from Names"
@@ -29,7 +29,7 @@ namespace LoadTestEm.Tests
         [TestMethod()]
         public void ExecuteAsyncTest2()
         {
-            var agent = new SqlAgent
+            var agent = new SqlLoadTask
             {
                 ConnectionString = "Data Source=(local);Initial Catalog=LoadTestEm;Integrated Security=SSPI",
                 Command = "select * from Names"
@@ -41,7 +41,7 @@ namespace LoadTestEm.Tests
                 total += Task.Run(() => agent.ExecuteAsync()).Result;
             }
 
-            agent = new SqlAgent
+            agent = new SqlLoadTask
             {
                 ConnectionString = "Data Source=(local);Initial Catalog=LoadTestEm;Integrated Security=SSPI",
                 ReuseConnection = false,
@@ -63,7 +63,7 @@ namespace LoadTestEm.Tests
             var conStr = "Data Source=(local);Initial Catalog=LoadTestEm;Integrated Security=SSPI";
             var cmd = "insert into Names (Name) values (@param1)";
 
-            var agent = new SqlAgent
+            var agent = new SqlLoadTask
             {
                 ConnectionString = conStr,
                 Command = cmd
@@ -84,7 +84,7 @@ namespace LoadTestEm.Tests
             var conStr = "Data Source=(local);Initial Catalog=LoadTestEm;Integrated Security=SSPI";
             var cmd = "Update Names set Name = @newName where name = @oldName";
 
-            var agent = new SqlAgent
+            var agent = new SqlLoadTask
             {
                 ConnectionString = conStr,
                 Command = cmd
@@ -106,7 +106,7 @@ namespace LoadTestEm.Tests
             var conStr = "Data Source=(local);Initial Catalog=LoadTestEm;Integrated Security=SSPI";
             var cmd = "Delete from Names where name = @name";
 
-            var agent = new SqlAgent
+            var agent = new SqlLoadTask
             {
                 ConnectionString = conStr,
                 Command = cmd

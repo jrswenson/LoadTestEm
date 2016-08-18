@@ -1,4 +1,4 @@
-﻿using LoadTestEm.Agents;
+﻿using LoadTestEm.LoadTasks;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -20,7 +20,7 @@ namespace LoadTestEm
                 trace.Read();
 
                 var tasks = new List<Task>();
-                var agents = new List<SqlAgent>();
+                var agents = new List<SqlLoadTask>();
 
                 foreach (var agent in agents)
                 {
