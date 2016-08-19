@@ -11,10 +11,10 @@ using LoadTestEm.LoadTasks;
 namespace LoadTestEm.Tests
 {
     [TestClass()]
-    public class SqlAgentTests
+    public class SqlLoadTaskTests
     {
         [TestMethod()]
-        public void ExecuteAsyncTest()
+        public void ExecuteAsyncSelectTest()
         {
             var agent = new SqlLoadTask
             {
@@ -27,7 +27,7 @@ namespace LoadTestEm.Tests
         }
 
         [TestMethod()]
-        public void ExecuteAsyncTest2()
+        public void ExecuteAsyncSelectTest2()
         {
             var agent = new SqlLoadTask
             {
@@ -75,6 +75,27 @@ namespace LoadTestEm.Tests
             for (var i = 0; i < 5; i++)
             {
                 total += Task.Run(() => agent.ExecuteAsync()).Result;
+            }
+        }
+
+        [TestMethod()]
+        public void ExecuteAsyncInsertRandoemTest()
+        {
+            var conStr = "Data Source=(local);Initial Catalog=LoadTestEm;Integrated Security=SSPI";
+            var cmd = "insert into Names (Name) values (@param1)";
+
+            var loadTask = new SqlLoadTask
+            {
+                ConnectionString = conStr,
+                Command = cmd
+            };
+
+            loadTask.CommandParameters.Add(new KeyValuePair<string, IValueGetter>("@param1", new RandomStringValueGetter(5)));
+
+            var total = 0L;
+            for (var i = 0; i < 5; i++)
+            {
+                total += Task.Run(() => loadTask.ExecuteAsync()).Result;
             }
         }
 

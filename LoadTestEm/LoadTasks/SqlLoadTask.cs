@@ -63,18 +63,17 @@ namespace LoadTestEm.LoadTasks
         }
 
         public async Task<long> ExecuteAsync()
+        {            
+            var task = Task.Run(() => Execute());
+            var result = await task;
+            
+            return result;
+        }
+
+        public long Execute()
         {
             var watch = Stopwatch.StartNew();
 
-            var task = Task.Factory.StartNew(() => Execute());
-            await task;
-
-            watch.Stop();
-            return watch.ElapsedMilliseconds;
-        }
-
-        private void Execute()
-        {
             if (ReuseConnection)
             {
                 ExecuteCommand(GetConnection());
@@ -86,6 +85,9 @@ namespace LoadTestEm.LoadTasks
                     ExecuteCommand(conn);
                 }
             }
+
+            watch.Stop();
+            return watch.ElapsedMilliseconds;
         }
 
         private SqlConnection GetConnection()
@@ -114,7 +116,9 @@ namespace LoadTestEm.LoadTasks
                 {
                     foreach (var item in _commandParameters)
                     {
-                        cmd.Parameters.AddWithValue(item.Key, item.Value.Value);
+                        var key = item.Key;
+                        var val = item.Value.Value;
+                        cmd.Parameters.AddWithValue(key, val);
                     }
                 }
 
