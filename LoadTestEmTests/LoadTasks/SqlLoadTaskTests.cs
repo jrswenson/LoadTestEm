@@ -14,6 +14,34 @@ namespace LoadTestEm.Tests
     public class SqlLoadTaskTests
     {
         [TestMethod()]
+        public void ExecuteAsyncStoredProcTest()
+        {
+            var agent = new SqlLoadTask
+            {
+                ConnectionString = "Data Source=(local);Initial Catalog=LoadTestEm;Integrated Security=SSPI",
+                Command = "SelectAllNames"
+            };
+
+            var result = Task.Run(() => agent.ExecuteAsync()).Result;
+            Assert.IsTrue(result.ExecutionTime > 0);
+        }
+
+        [TestMethod()]
+        public void ExecuteAsyncStoredProcTest2()
+        {
+            var agent = new SqlLoadTask
+            {
+                ConnectionString = "Data Source=(local);Initial Catalog=LoadTestEm;Integrated Security=SSPI",
+                Command = "SelectName"
+            };
+
+            agent.CommandParameters.Add(new KeyValuePair<string, IValueGetter>("@name", new StringValueGetter("Joe")));
+
+            var result = Task.Run(() => agent.ExecuteAsync()).Result;
+            Assert.IsTrue(result.ExecutionTime > 0);
+        }
+
+        [TestMethod()]
         public void ExecuteAsyncSelectTest()
         {
             var agent = new SqlLoadTask
@@ -23,7 +51,7 @@ namespace LoadTestEm.Tests
             };
 
             var result = Task.Run(() => agent.ExecuteAsync()).Result;
-            Assert.IsTrue(result > 0);
+            Assert.IsTrue(result.ExecutionTime > 0);
         }
 
         [TestMethod()]
@@ -38,7 +66,7 @@ namespace LoadTestEm.Tests
             var total = 0L;
             for (var i = 0; i < 5; i++)
             {
-                total += Task.Run(() => agent.ExecuteAsync()).Result;
+                total += Task.Run(() => agent.ExecuteAsync()).Result.ExecutionTime;
             }
 
             agent = new SqlLoadTask
@@ -51,7 +79,7 @@ namespace LoadTestEm.Tests
             total = 0L;
             for (var i = 0; i < 5; i++)
             {
-                total += Task.Run(() => agent.ExecuteAsync()).Result;
+                total += Task.Run(() => agent.ExecuteAsync()).Result.ExecutionTime;
             }
 
             Assert.IsTrue(total > 0);
@@ -74,7 +102,7 @@ namespace LoadTestEm.Tests
             var total = 0L;
             for (var i = 0; i < 5; i++)
             {
-                total += Task.Run(() => agent.ExecuteAsync()).Result;
+                total += Task.Run(() => agent.ExecuteAsync()).Result.ExecutionTime;
             }
         }
 
@@ -95,7 +123,7 @@ namespace LoadTestEm.Tests
             var total = 0L;
             for (var i = 0; i < 5; i++)
             {
-                total += Task.Run(() => loadTask.ExecuteAsync()).Result;
+                total += Task.Run(() => loadTask.ExecuteAsync()).Result.ExecutionTime;
             }
         }
 
@@ -117,7 +145,7 @@ namespace LoadTestEm.Tests
             var total = 0L;
             for (var i = 0; i < 5; i++)
             {
-                total += Task.Run(() => agent.ExecuteAsync()).Result;
+                total += Task.Run(() => agent.ExecuteAsync()).Result.ExecutionTime;
             }
         }
 
@@ -138,7 +166,7 @@ namespace LoadTestEm.Tests
             var total = 0L;
             for (var i = 0; i < 5; i++)
             {
-                total += Task.Run(() => agent.ExecuteAsync()).Result;
+                total += Task.Run(() => agent.ExecuteAsync()).Result.ExecutionTime;
             }
         }
     }

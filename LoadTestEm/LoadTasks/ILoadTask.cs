@@ -3,10 +3,15 @@ using System.Threading.Tasks;
 
 namespace LoadTestEm.LoadTasks
 {
+    public interface ILoadResult
+    {
+        long ExecutionTime { get; set; }
+    }
+
     public interface ILoadTask
     {
-        long Execute();
+        ILoadResult Execute();
 
-        Task<long> ExecuteAsync();
+        Task<ILoadResult> ExecuteAsync();
     }
 }

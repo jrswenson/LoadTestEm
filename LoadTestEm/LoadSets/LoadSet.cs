@@ -32,7 +32,7 @@ namespace LoadTestEm.LoadSets
 
             foreach (var task in Tasks)
             {
-                result += task.Execute();
+                result += task.Execute().ExecutionTime;
             }
 
             return result;

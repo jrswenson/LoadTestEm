@@ -1,13 +1,25 @@
 ﻿using LoadTestEm.ValueGetters;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LoadTestEm.LoadTasks
 {
+    public struct SqlLoadResult : ILoadResult
+    {
+        public long ExecutionTime { get; set; }
+        public int RowsReturned { get; set; }
+        public int RowsAffected { get; set; }
+
+        public IDictionary Statistics { get; set; }
+    }
+
     public class SqlLoadTask : ILoadTask, IDisposable
     {
         private SqlConnection connection;
@@ -62,32 +74,30 @@ namespace LoadTestEm.LoadTasks
             }
         }
 
-        public async Task<long> ExecuteAsync()
-        {            
+        public async Task<ILoadResult> ExecuteAsync()
+        {
             var task = Task.Run(() => Execute());
             var result = await task;
-            
+
             return result;
         }
 
-        public long Execute()
+        public ILoadResult Execute()
         {
-            var watch = Stopwatch.StartNew();
-
+            SqlLoadResult result;
             if (ReuseConnection)
             {
-                ExecuteCommand(GetConnection());
+                result = ExecuteCommand(GetConnection());
             }
             else
             {
                 using (var conn = new SqlConnection(ConnectionString))
                 {
-                    ExecuteCommand(conn);
+                    result = ExecuteCommand(conn);
                 }
             }
 
-            watch.Stop();
-            return watch.ElapsedMilliseconds;
+            return result;
         }
 
         private SqlConnection GetConnection()
@@ -98,7 +108,7 @@ namespace LoadTestEm.LoadTasks
             return connection;
         }
 
-        private void ExecuteCommand(SqlConnection conn)
+        private SqlLoadResult ExecuteCommand(SqlConnection conn)
         {
             if (conn == null)
                 throw new ArgumentException("You must provide a valid SqlConnection.");
@@ -106,11 +116,21 @@ namespace LoadTestEm.LoadTasks
             if (string.IsNullOrWhiteSpace(Command))
                 throw new ArgumentException("You must provide a valid command.");
 
+            conn.StatisticsEnabled = true;
+            conn.ResetStatistics();
+
             using (var cmd = new SqlCommand())
             {
                 cmd.Connection = conn;
-                cmd.CommandType = System.Data.CommandType.Text;
+
+                var firstWord = Command.Split(null).FirstOrDefault().ToUpper();
+                string[] sqlCommands = { "SELECT", "INSERT", "DELETE", "UPDATE" };
+
+                cmd.CommandType = sqlCommands.Contains(firstWord) ? CommandType.Text : CommandType.StoredProcedure;
                 cmd.CommandText = Command;
+
+                //if (true)
+                //    cmd.CommandText += " OPTION (OPTIMIZE FOR UNKNOWN)";
 
                 if (_commandParameters.Any())
                 {
@@ -122,10 +142,44 @@ namespace LoadTestEm.LoadTasks
                     }
                 }
 
-                if (conn.State != System.Data.ConnectionState.Open)
+                var watch = Stopwatch.StartNew();
+
+                if (conn.State != ConnectionState.Open)
                     conn.Open();
 
-                var rows = cmd.ExecuteNonQuery();
+                var result = new SqlLoadResult();
+                SqlDataReader reader = null;
+                switch (firstWord)
+                {
+                    case "SELECT":
+                        reader = cmd.ExecuteReader();
+                        break;
+                    default:
+                        result.RowsAffected = cmd.ExecuteNonQuery();
+                        break;
+                }
+
+                watch.Stop();
+
+                result.Statistics = conn.RetrieveStatistics();
+
+                result.ExecutionTime = watch.ElapsedMilliseconds;
+
+                if (reader != null)
+                {
+                    var rows = 0;
+                    while (reader.Read())
+                    {
+                        rows++;
+                    }
+                    result.RowsReturned = rows;
+                    reader.Close();
+                    reader = null;
+                }
+
+                result.Statistics = conn.RetrieveStatistics();
+
+                return result;
             }
         }
     }

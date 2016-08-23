@@ -51,6 +51,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="HATests.cs" />
     <Compile Include="LoaderTests.cs" />
     <Compile Include="LoadSets\LoadSetTests.cs" />
     <Compile Include="LoadTasks\SqlLoadTaskTests.cs" />
