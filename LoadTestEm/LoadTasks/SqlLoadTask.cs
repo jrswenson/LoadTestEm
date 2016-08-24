@@ -116,13 +116,14 @@ namespace LoadTestEm.LoadTasks
             if (string.IsNullOrWhiteSpace(Command))
                 throw new ArgumentException("You must provide a valid command.");
 
+            if (conn.State != ConnectionState.Open)
+                conn.Open();
+
             conn.StatisticsEnabled = true;
             conn.ResetStatistics();
 
-            using (var cmd = new SqlCommand())
+            using (var cmd = new SqlCommand { Connection = conn })
             {
-                cmd.Connection = conn;
-
                 var firstWord = Command.Split(null).FirstOrDefault().ToUpper();
                 string[] sqlCommands = { "SELECT", "INSERT", "DELETE", "UPDATE" };
 
@@ -142,41 +143,28 @@ namespace LoadTestEm.LoadTasks
                     }
                 }
 
-                var watch = Stopwatch.StartNew();
-
-                if (conn.State != ConnectionState.Open)
-                    conn.Open();
+                var watch = Stopwatch.StartNew();                
 
                 var result = new SqlLoadResult();
-                SqlDataReader reader = null;
                 switch (firstWord)
                 {
                     case "SELECT":
-                        reader = cmd.ExecuteReader();
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            watch.Stop();
+
+                            var dataTable = new DataTable();
+                            dataTable.Load(reader);
+                            result.RowsReturned = dataTable.Rows.Count;
+                        }
                         break;
                     default:
                         result.RowsAffected = cmd.ExecuteNonQuery();
+                        watch.Stop();
                         break;
                 }
 
-                watch.Stop();
-
-                result.Statistics = conn.RetrieveStatistics();
-
                 result.ExecutionTime = watch.ElapsedMilliseconds;
-
-                if (reader != null)
-                {
-                    var rows = 0;
-                    while (reader.Read())
-                    {
-                        rows++;
-                    }
-                    result.RowsReturned = rows;
-                    reader.Close();
-                    reader = null;
-                }
-
                 result.Statistics = conn.RetrieveStatistics();
 
                 return result;

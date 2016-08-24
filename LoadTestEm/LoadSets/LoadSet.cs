@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LoadTestEm.LoadSets
 {
-    public interface ILoadSet
+    public interface ILoadSet : IDisposable
     {
         ICollection<ILoadTask> Tasks { get; set; }
 
@@ -26,7 +26,9 @@ namespace LoadTestEm.LoadSets
             set { _tasks = value; }
         }
 
-        public long Execute()
+        public virtual void Dispose() { }
+
+        public virtual long Execute()
         {
             var result = 0L;
 
