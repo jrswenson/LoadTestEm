@@ -11,11 +11,11 @@ namespace LoadTestEm.Tests
     [TestClass()]
     public class LoaderTests
     {
-        [TestMethod()]
-        public void TestEmTest()
-        {
-            var loader = new Loader();
-            loader.TestEm();
-        }
+        //[TestMethod()]
+        //public void TestEmTest()
+        //{
+        //    var loader = new Loader();
+        //    loader.TestEm();
+        //}
     }
 }
