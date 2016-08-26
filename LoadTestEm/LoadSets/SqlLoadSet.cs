@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 
 namespace LoadTestEm.LoadSets
@@ -61,30 +62,27 @@ namespace LoadTestEm.LoadSets
             }
         }
 
-        public override long Execute()
+        static readonly object _paramsLock = new object();
+        public override ISetResult Execute()
         {
-            var result = 0L;
-
             foreach (SqlLoadTask task in Tasks)
             {
                 if (string.IsNullOrWhiteSpace(task.ConnectionString))
                     task.ConnectionString = ConnectionString;
 
-                if (task.CommandParameters.Any() == false && CommandParameters.Any())
+                lock (_paramsLock)
                 {
-                    foreach (var parameter in CommandParameters)
+                    if (task.CommandParameters.Any() == false && CommandParameters.Any())
                     {
-                        task.CommandParameters.Add(parameter);
+                        foreach (var parameter in CommandParameters)
+                        {
+                            task.CommandParameters.Add(parameter);
+                        }
                     }
-                }
-
-                var taskResult = task.Execute();
-                result += taskResult.ExecutionTime;
-
-                _allStatistics.Add(taskResult.Statistics);
+                }                
             }
 
-            return result;
+            return base.Execute();
         }
 
         public override void Dispose()

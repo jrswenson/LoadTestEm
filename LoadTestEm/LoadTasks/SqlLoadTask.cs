@@ -11,33 +11,24 @@ using System.Threading.Tasks;
 
 namespace LoadTestEm.LoadTasks
 {
-    public struct SqlLoadResult : ILoadResult
+    public class SqlLoadResult : LoadResult
     {
-        public long ExecutionTime { get; set; }
-        public int RowsReturned { get; set; }
-        public int RowsAffected { get; set; }
-
-        public IDictionary Statistics { get; set; }
+        public string Command { get; set; }
+        public int ConnectionHashCode { get; set; }
     }
 
     public class SqlLoadTask : ILoadTask, IDisposable
     {
         private SqlConnection connection;
-        private bool reuseConnection = true;
+        private string _identifier = string.Empty;
+
+        public string Identifier
+        {
+            get { return _identifier; }
+            set { _identifier = value; }
+        }
 
         public string ConnectionString { get; set; }
-
-        public bool ReuseConnection
-        {
-            get
-            {
-                return reuseConnection;
-            }
-            set
-            {
-                reuseConnection = value;
-            }
-        }
 
         public string Command { get; set; }
 
@@ -84,40 +75,24 @@ namespace LoadTestEm.LoadTasks
 
         public ILoadResult Execute()
         {
-            SqlLoadResult result;
-            if (ReuseConnection)
+            LoadResult result;
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                result = ExecuteCommand(GetConnection());
-            }
-            else
-            {
-                using (var conn = new SqlConnection(ConnectionString))
-                {
-                    result = ExecuteCommand(conn);
-                }
+                conn.Open();
+                result = ExecuteCommand(conn);
             }
 
             return result;
         }
 
-        private SqlConnection GetConnection()
-        {
-            if (connection == null)
-                connection = new SqlConnection(ConnectionString);
-
-            return connection;
-        }
-
-        private SqlLoadResult ExecuteCommand(SqlConnection conn)
+        static readonly object _connLock = new object();
+        private LoadResult ExecuteCommand(SqlConnection conn)
         {
             if (conn == null)
                 throw new ArgumentException("You must provide a valid SqlConnection.");
 
             if (string.IsNullOrWhiteSpace(Command))
                 throw new ArgumentException("You must provide a valid command.");
-
-            if (conn.State != ConnectionState.Open)
-                conn.Open();
 
             conn.StatisticsEnabled = true;
             conn.ResetStatistics();
@@ -130,9 +105,6 @@ namespace LoadTestEm.LoadTasks
                 cmd.CommandType = sqlCommands.Contains(firstWord) ? CommandType.Text : CommandType.StoredProcedure;
                 cmd.CommandText = Command;
 
-                //if (true)
-                //    cmd.CommandText += " OPTION (OPTIMIZE FOR UNKNOWN)";
-
                 if (_commandParameters.Any())
                 {
                     foreach (var item in _commandParameters)
@@ -143,9 +115,9 @@ namespace LoadTestEm.LoadTasks
                     }
                 }
 
-                var watch = Stopwatch.StartNew();                
+                var watch = Stopwatch.StartNew();
 
-                var result = new SqlLoadResult();
+                var result = new SqlLoadResult() { Identifier = Identifier, Command = Command, ConnectionHashCode = conn.GetHashCode() };
                 switch (firstWord)
                 {
                     case "SELECT":
@@ -155,18 +127,17 @@ namespace LoadTestEm.LoadTasks
 
                             var dataTable = new DataTable();
                             dataTable.Load(reader);
-                            result.RowsReturned = dataTable.Rows.Count;
+                            //result.RowsReturned = dataTable.Rows.Count;
                         }
                         break;
                     default:
-                        result.RowsAffected = cmd.ExecuteNonQuery();
+                        //result.RowsAffected = cmd.ExecuteNonQuery();
                         watch.Stop();
                         break;
                 }
 
                 result.ExecutionTime = watch.ElapsedMilliseconds;
-                result.Statistics = conn.RetrieveStatistics();
-
+                result.Diagnostics = conn.RetrieveStatistics();
                 return result;
             }
         }

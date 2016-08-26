@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>LoadTestEm</id>
+    <version>1.0.9</version>
+    <authors>Jeff Swenson</authors>
+    <owners>Jeff Swenson</owners>
+    <licenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</licenseUrl>
+    <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
+    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>LoadTestEm</description>
+    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>Tag1 Tag2</tags>
+    <dependencies>    
+      <dependency id="System.Data.Common" version="4.1.0" />
+      <dependency id="System.Data.SqlClient" version="4.1.0" />
+    </dependencies>    
+  </metadata>
+  <files>
+    <file src="LoadTestEm\bin\Debug\LoadTestEm.dll" target="lib\LoadTestEm.dll" />
+    <file src="C:\Program Files (x86)\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.ConnectionInfo.dll" target="lib\Microsoft.SqlServer.ConnectionInfo.dll" />
+    <file src="C:\Program Files (x86)\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.ConnectionInfoExtended.dll" target="lib\Microsoft.SqlServer.ConnectionInfoExtended.dll"/>
+    <file src="C:\Program Files (x86)\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.Management.Sdk.Sfc.dll" target="lib\Microsoft.SqlServer.Management.Sdk.Sfc.dll"/>
+    <file src="C:\Program Files (x86)\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.Management.Utility.dll" target="lib\Microsoft.SqlServer.Management.Utility.dll"/>
+    <file src="C:\Program Files (x86)\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.Smo.dll" target="lib\Microsoft.SqlServer.Smo.dll"/>
+    <file src="C:\Program Files (x86)\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.SmoExtended.dll" target="lib\Microsoft.SqlServer.SmoExtended.dll"/>
+    <file src="C:\Program Files (x86)\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.SqlEnum.dll" target="lib\Microsoft.SqlServer.SqlEnum.dll"/>
+    </files>
+</package>

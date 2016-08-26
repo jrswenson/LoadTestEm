@@ -1,21 +1,23 @@
 ﻿using LoadTestEm.LoadTasks;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace LoadTestEm.LoadSets
 {
     public interface ILoadSet : IDisposable
     {
+        string Identifier { get; set; }
+
         ICollection<ILoadTask> Tasks { get; set; }
 
-        long Execute();
+        ISetResult Execute();
 
-        Task<long> ExecuteAsync();
+        Task<ISetResult> ExecuteAsync();
     }
+
     public class LoadSet : ILoadSet
     {
         private ICollection<ILoadTask> _tasks = new List<ILoadTask>();
@@ -28,22 +30,34 @@ namespace LoadTestEm.LoadSets
 
         public virtual void Dispose() { }
 
-        public virtual long Execute()
+        private string _identifier = string.Empty;
+        public string Identifier
         {
-            var result = 0L;
+            get { return _identifier; }
+            set { _identifier = value; }
+        }
 
+        public virtual ISetResult Execute()
+        {
+            var result = new SetResult() { Identifier = Identifier };
+
+            var sw = new Stopwatch();
+            sw.Start();
             foreach (var task in Tasks)
             {
-                result += task.Execute().ExecutionTime;
+                var execute = task.Execute();
+                result.LoadTaskResults.Add(execute);
             }
+            sw.Stop();
+            result.ExecutionTime = sw.ElapsedMilliseconds;
 
             return result;
         }
 
-        public async Task<long> ExecuteAsync()
+        public async Task<ISetResult> ExecuteAsync()
         {
-            var task = Task.Run(() => Execute());
-            var result = await task;
+            var tasks = Task.Run(() => Execute());
+            var result = await tasks;
 
             return result;
         }
